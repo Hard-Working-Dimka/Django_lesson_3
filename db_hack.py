@@ -6,8 +6,6 @@ from datacenter.models import Lesson
 from random import choice
 
 
-# imp.reload(TODO)
-
 def find_person(name, school_class):
     return Schoolkid.objects.get(full_name__contains=name, year_of_study=school_class[:1],
                                  group_letter=school_class[1:2])
@@ -26,11 +24,8 @@ def remove_chastisements(name, school_class):
 def create_commendation(name, school_class, lesson):
     schoolkid = find_person(name, school_class)
 
-    try:
-        lesson = Lesson.objects.filter(year_of_study=schoolkid.year_of_study, group_letter=schoolkid.group_letter,
+    lesson = Lesson.objects.filter(year_of_study=schoolkid.year_of_study, group_letter=schoolkid.group_letter,
                                        subject__title=lesson).order_by("?").first()
-    except IndexError:
-        print("Ошибка в названии урока! Введите название в точности, как в журнале.")
 
     with open("laudatory_messages.txt", "r", encoding="utf8") as file:
         messages = file.readlines()
