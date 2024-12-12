@@ -25,7 +25,7 @@ def create_commendation(name, school_class, lesson):
     schoolkid = find_person(name, school_class)
 
     lesson = Lesson.objects.filter(year_of_study=schoolkid.year_of_study, group_letter=schoolkid.group_letter,
-                                       subject__title=lesson).order_by("?").first()
+                                   subject__title=lesson).order_by("?").first()
 
     with open("laudatory_messages.txt", "r", encoding="utf8") as file:
         messages = file.readlines()
