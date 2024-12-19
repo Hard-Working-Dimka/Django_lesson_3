@@ -3,8 +3,6 @@ from datacenter.models import Mark
 from datacenter.models import Chastisement
 from datacenter.models import Commendation
 from datacenter.models import Lesson
-from django.core.exceptions import ObjectDoesNotExist
-from django.core.exceptions import MultipleObjectsReturned
 from random import choice
 
 
@@ -12,10 +10,10 @@ def find_person(name, year_of_study, group_letter):
     try:
         return Schoolkid.objects.get(full_name__contains=name, year_of_study=year_of_study,
                                      group_letter=group_letter)
-    except ObjectDoesNotExist:
-        print("Ученик не найден! Проверьте правильность введенных данных.")
-    except MultipleObjectsReturned:
-        print("Найдено несколько учеников! Уточните ФИО.")
+    except Schoolkid.DoesNotExist:
+        raise Schoolkid.DoesNotExist("Ученик не найден! Проверьте правильность введенных данных.") from None
+    except Schoolkid.MultipleObjectsReturned:
+        raise Schoolkid.MultipleObjectsReturned("Найдено несколько учеников! Уточните ФИО.") from None
 
 
 def fix_marks(name, year_of_study, group_letter):
@@ -33,12 +31,10 @@ def create_commendation(name, year_of_study, group_letter, lesson):
 
     lesson = Lesson.objects.filter(year_of_study=schoolkid.year_of_study, group_letter=schoolkid.group_letter,
                                    subject__title=lesson).order_by("?").first()
-
+    if lesson is None:
+        raise Lesson.DoesNotExist("Предмет не найден! Проверьте правильность ввода.")
     with open("laudatory_messages.txt", "r", encoding="utf8") as file:
         messages = file.readlines()
         massage = choice(messages)
-        try:
-            Commendation.objects.create(teacher=lesson.teacher, subject=lesson.subject, schoolkid=schoolkid,
-                                        created=lesson.date, text=massage)
-        except AttributeError:
-            print("Предмет не найден! Проверьте правильность ввода.")
+        Commendation.objects.create(teacher=lesson.teacher, subject=lesson.subject, schoolkid=schoolkid,
+                                    created=lesson.date, text=massage)
